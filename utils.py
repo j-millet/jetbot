@@ -2,6 +2,7 @@ import os
 import sys
 import importlib
 import pandas as pd
+import numpy as np
 import torch
 import torch.nn as nn
 from torchvision.transforms import v2
@@ -97,3 +98,11 @@ def save_onnx_model(model: torch.nn.Module, name: str) -> None:
     onnx_program.optimize()
     onnx_program.save(f"/saved_models/{name}.onnx")
     print(f"Model saved as {name}.onnx")
+
+
+def to_numpy(tensor: torch.Tensor) -> np.ndarray:
+    """
+    Converts a PyTorch tensor to a NumPy array.
+    If the tensor requires gradients, it detaches it first.
+    """
+    return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
