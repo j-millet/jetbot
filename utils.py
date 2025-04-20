@@ -1,7 +1,28 @@
 import os
+import sys
+import importlib
 import pandas as pd
 import torch
+import torch.nn as nn
 from torchvision.transforms import v2
+
+
+def load_model_from_path(path, num_outputs):
+    """
+    Dynamically import the file at `path` and return an instance
+    of the first subclass of nn.Module it defines, initialized with num_outputs.
+    """
+    spec = importlib.util.spec_from_file_location("model_module", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["model_module"] = module
+    spec.loader.exec_module(module)
+
+    for name in dir(module):
+        obj = getattr(module, name)
+        if isinstance(obj, type) and issubclass(obj, nn.Module) and obj is not nn.Module:
+            return obj(num_outputs=num_outputs)
+
+    raise RuntimeError(f"No nn.Module subclass found in {path}")
 
 
 def get_data(path: str = 'dataset') -> pd.DataFrame:
@@ -27,7 +48,7 @@ def get_data(path: str = 'dataset') -> pd.DataFrame:
     return pd.concat(dataframes, axis=0)
 
 
-def get_transorms() -> tuple:
+def get_transforms() -> tuple:
     """
     Returns the training and validation transformations for the dataset.
     """
