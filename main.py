@@ -31,14 +31,14 @@ train_paths, val_paths, train_fw, val_fw, train_lt, val_lt = train_test_split(
 
 train_ds = JetBotDataset(
     train_paths,
-    torch.tensor(train_fw),
-    torch.tensor(train_lt),
+    train_fw,
+    train_lt,
     transform=train_transforms
 )
 val_ds = JetBotDataset(
     val_paths,
-    torch.tensor(val_fw),
-    torch.tensor(val_lt),
+    val_fw,
+    val_lt,
     transform=val_transforms
 )
 
