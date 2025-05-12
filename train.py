@@ -38,8 +38,7 @@ def main(args):
     model.to(device)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
-
+    optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     for epoch in range(args.epochs):
         model.train()
         total_loss = 0.0
@@ -77,7 +76,7 @@ def main(args):
             f"Train MSE: {avg_train_loss:.4f}, "
             f"Val MSE:   {avg_val_loss:.4f}")
 
-        save_onnx_model(model, os.path.splitext(os.path.basename(args.model_file))[0] + ".onnx")
+        save_onnx_model(model, os.path.splitext(os.path.basename(args.model_file))[0])
 
 
 if __name__ == "__main__":
@@ -97,11 +96,11 @@ if __name__ == "__main__":
         help="number of epochs to train"
     )
     parser.add_argument(
-        "--lr", type=float, default=1e-3,
+        "--lr", type=float, default=1e-4,
         help="learning rate"
     )
     parser.add_argument(
-        "--test-size", type=float, default=0.2,
+        "--test-size", type=float, default=0.3,
         help="validation split fraction"
     )
     parser.add_argument(

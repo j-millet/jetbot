@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import importlib
 import pandas as pd
 import numpy as np
@@ -76,6 +77,8 @@ def get_transforms() -> tuple:
             p=0.3
         ),
         v2.ToTensor(),
+        v2.Normalize(mean=[0.485, 0.456, 0.406],
+             std=[0.229, 0.224, 0.225]),
         v2.RandomErasing(
             p=0.5,
             scale=(0.02, 0.1),
@@ -85,19 +88,23 @@ def get_transforms() -> tuple:
     ])
     val_transforms = v2.Compose([
         v2.ToTensor(),
+        v2.Normalize(mean=[0.485, 0.456, 0.406],
+             std=[0.229, 0.224, 0.225]),
     ])
     return (train_transforms, val_transforms)
 
 
 def save_onnx_model(model: torch.nn.Module, name: str) -> None:
-    """
-    Placeholder function to save the ONNX model.
-    """
+    model_cpu = copy.deepcopy(model).cpu().eval()
     example_inputs = (torch.randn(1, 3, 224, 224),)
-    onnx_program = torch.onnx.export(model, example_inputs, dynamo=True)
-    onnx_program.optimize()
-    onnx_program.save(f"/saved_models/{name}.onnx")
+    torch.onnx.export(
+        model_cpu,
+        example_inputs,
+        f"saved_models/{name}.onnx",
+        opset_version=11,
+    )
     print(f"Model saved as {name}.onnx")
+    del model_cpu
 
 
 def to_numpy(tensor: torch.Tensor) -> np.ndarray:
